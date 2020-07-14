@@ -10,31 +10,10 @@ RTMP is a video streaming protocol that makes high quality live streaming possib
 
 ```hcl
 module "rtmp" {
-  source       = "./modules/rtmp_server"
-  youtube_key  = var.youtube_key
-  facebook_key = var.facebook_key
-  key_name     = var.keyname
-}
-```
-
-### `variables.tf`
-
-```hcl
-variable youtube_key {
-  description = "YouTube RTMP key"
-  default     = ""
-  required    = true
-}
-
-variable facebook_key {
-  description = "Facebook RTMP key"
-  default     = ""
-  required    = true
-}
-
-variable keyname {
-  description = "SSH Keyname (for SSH access if required)."
-  default     = ""
+  source       = "willhallonline/rtmp-server/aws"
+  youtube_key  = "YouTube-RTMP-KEY"
+  facebook_key = "Facebook-RTMP-KEY"
+  key_name     = "ssh-keyname"
 }
 ```
 
@@ -42,7 +21,7 @@ variable keyname {
 
 ```hcl
 output "ip_address" {
-  description = "External IP address to route"
+  description = "External IP address to route RTMP traffic to"
   value = module.rtmp.ip_address
 }
 ```

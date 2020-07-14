@@ -37,20 +37,20 @@ apt-get install -y build-essential ca-certificates openssl libssl-dev stunnel
 # Download and decompress Nginx
 mkdir -p /tmp/build/nginx 
 cd /tmp/build/nginx 
-wget -O ${NGINX_VERSION}.tar.gz https://nginx.org/download/${NGINX_VERSION}.tar.gz 
-tar -zxf ${NGINX_VERSION}.tar.gz
+wget -O "${NGINX_VERSION}".tar.gz https://nginx.org/download/"${NGINX_VERSION}".tar.gz 
+tar -zxf "${NGINX_VERSION}".tar.gz
 
 # Download and decompress RTMP module
 mkdir -p /tmp/build/nginx-rtmp-module 
 cd /tmp/build/nginx-rtmp-module 
-wget -O nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}.tar.gz https://github.com/arut/nginx-rtmp-module/archive/v${NGINX_RTMP_MODULE_VERSION}.tar.gz 
-tar -zxf nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}.tar.gz 
-cd nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}
+wget -O nginx-rtmp-module-"${NGINX_RTMP_MODULE_VERSION}".tar.gz https://github.com/arut/nginx-rtmp-module/archive/v"${NGINX_RTMP_MODULE_VERSION}".tar.gz 
+tar -zxf nginx-rtmp-module-"${NGINX_RTMP_MODULE_VERSION}".tar.gz 
+cd nginx-rtmp-module-"${NGINX_RTMP_MODULE_VERSION}"
 
 # Build and install Nginx
 # The default puts everything under /usr/local/nginx, so it's needed to change
 # it explicitly. Not just for order but to have it in the PATH
-cd /tmp/build/nginx/${NGINX_VERSION} 
+cd /tmp/build/nginx/"${NGINX_VERSION}"
 ./configure \
     --sbin-path=/usr/sbin/nginx \
     --conf-path=/etc/nginx/nginx.conf \
@@ -63,11 +63,11 @@ cd /tmp/build/nginx/${NGINX_VERSION}
     --with-threads \
     --without-http_rewrite_module \
     --without-http_gzip_module \
-    --add-module=/tmp/build/nginx-rtmp-module/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION} 
-make -j $(getconf _NPROCESSORS_ONLN) 
+    --add-module=/tmp/build/nginx-rtmp-module/nginx-rtmp-module-"${NGINX_RTMP_MODULE_VERSION}" 
+make -j "$(getconf _NPROCESSORS_ONLN)"
 make install 
 mkdir /var/lock/nginx
-cp /tmp/build/nginx-rtmp-module/nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}/stat.xsl /usr/local/nginx/html/
+cp /tmp/build/nginx-rtmp-module/nginx-rtmp-module-"${NGINX_RTMP_MODULE_VERSION}"/stat.xsl /usr/local/nginx/html/
 rm -rf /tmp/build
 
 # create stunnel conf
@@ -83,22 +83,22 @@ policy                  = policy_anything
 commonName              = localhost
 EOF
 
-if [[ ! -f ${STUNNEL_KEY} ]]; then
-    if [[ -f ${STUNNEL_CRT} ]]; then
+if [[ ! -f "${STUNNEL_KEY}" ]]; then
+    if [[ -f "${STUNNEL_CRT}" ]]; then
         echo >&2 "crt (${STUNNEL_CRT}) missing key (${STUNNEL_KEY})"
         exit 1
     fi
 
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ${STUNNEL_KEY} -out ${STUNNEL_CRT} \
-        -config ${STUNNEL_OPENSSL_CONF} 
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "${STUNNEL_KEY}" -out "${STUNNEL_CRT}" \
+        -config "${STUNNEL_OPENSSL_CONF}"
 fi
 
-cp -v ${STUNNEL_CAFILE} /usr/local/share/ca-certificates/stunnel-ca.crt
-cp -v ${STUNNEL_CRT} /usr/local/share/ca-certificates/stunnel.crt
+cp -v "${STUNNEL_CAFILE}" /usr/local/share/ca-certificates/stunnel-ca.crt
+cp -v "${STUNNEL_CRT}" /usr/local/share/ca-certificates/stunnel.crt
 update-ca-certificates
 
 # # create nginx conf
-cat > ${NGINX_CONF_PATH} <<EOF
+cat > "${NGINX_CONF_PATH}" <<EOF
 worker_processes 1;
 
 error_log /var/log/nginx/error.log info;
@@ -140,7 +140,7 @@ http {
 EOF
 
 # create stunnel.conf
-cat > ${STUNNEL_CONF} <<EOF
+cat > "${STUNNEL_CONF}" <<EOF
 cert = /etc/stunnel/stunnel.pem
 key = /etc/stunnel/stunnel.key
 
@@ -196,7 +196,7 @@ After=network.target nginx.service
 [Service]
 Type=forking
 PIDFile=/run/stunnel.pid
-ExecStart=/usr/bin/stunnel ${STUNNEL_CONF}
+ExecStart=/usr/bin/stunnel "${STUNNEL_CONF}
 ExecStop=-/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/stunnel.pid
 TimeoutStopSec=5
 KillMode=mixed
